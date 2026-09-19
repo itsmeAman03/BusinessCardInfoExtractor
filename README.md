@@ -175,17 +175,3 @@ regenerates `screenshot.png`.
   reason; hit **Process cards** again to retry just the failed ones.
 - Keep `LLAMA_MAX_SIZE` ≤ 1024 on CPU to keep prompt tokens (and therefore
   per-card latency) down.
-
-## Publishing
-
-The repo is ready to push — just connect your remote:
-
-```bash
-git remote add origin https://github.com/<your-username>/business-card-extractor.git
-git push -u origin main
-```
-
-Before publishing: replace `<YOUR NAME>` in `LICENSE` (or pick another
-license), and double-check you're not committing anything you don't want
-public (`git status` / `git diff --cached`). `settings.json`, `uploads/` and
-`output/` are already git-ignored.
