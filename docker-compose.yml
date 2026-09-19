@@ -53,9 +53,12 @@ services:
     volumes:
       - ./uploads:/app/uploads   # keep uploaded card images
       - ./output:/app/output     # keep exported CSV/XLSX files
-    # Bound to localhost only — nginx (on the host) fronts it with your domain.
+    # Exposes the app on all interfaces. Access is still controlled by the
+    # EC2 security group:
+    #   • no-domain demo: open TCP 8090 in the SG → http://<EC2-IP>:8090
+    #   • nginx/domain:   keep the SG closed on 8090 (nginx on :80 fronts it)
     ports:
-      - "127.0.0.1:8090:8090"
+      - "8090:8090"
     depends_on:
       - llama
     restart: unless-stopped
