@@ -1,0 +1,64 @@
+# Business Card Extractor — full stack
+#   llama : official llama.cpp server (downloads Qwen3-VL-4B on first start)
+#   app   : NiceGUI frontend (built from ./Dockerfile)
+#
+# Usage:
+#   docker compose up -d --build
+#   docker compose logs -f llama     # watch model download + "listening" line
+
+services:
+  llama:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    container_name: bc-extractor-llama
+    # Same flags as your local command:
+    #   llama-server -hf Qwen/Qwen3-VL-4B-Instruct-GGUF:Q4_K_M -ngl 0 -t 8 -c 8192 -b 2048 -ub 512 -np 1
+    # Adjust -t to the number of vCPUs on your EC2 instance.
+    command:
+      - "-hf"
+      - "Qwen/Qwen3-VL-4B-Instruct-GGUF:Q4_K_M"
+      - "-ngl"
+      - "0"
+      - "-t"
+      - "8"
+      - "-c"
+      - "8192"
+      - "-b"
+      - "2048"
+      - "-ub"
+      - "512"
+      - "-np"
+      - "1"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8080"
+    environment:
+      # Persist the ~2.5 GB model download inside the named volume
+      - LLAMA_CACHE=/cache
+    volumes:
+      - llama-model-cache:/cache
+    restart: unless-stopped
+    # Not exposed to the host on purpose (the app reaches it over the docker
+    # network at http://llama:8080). For debugging, uncomment:
+    # ports:
+    #   - "127.0.0.1:8080:8080"
+
+  app:
+    build: .
+    container_name: bc-extractor-app
+    environment:
+      - LLAMA_SERVER_URL=http://llama:8080
+      - HOST=0.0.0.0
+      - PORT=8090
+    volumes:
+      - ./uploads:/app/uploads   # keep uploaded card images
+      - ./output:/app/output     # keep exported CSV/XLSX files
+    # Bound to localhost only — nginx (on the host) fronts it with your domain.
+    ports:
+      - "127.0.0.1:8090:8090"
+    depends_on:
+      - llama
+    restart: unless-stopped
+
+volumes:
+  llama-model-cache:

@@ -1,0 +1,15 @@
+.venv
+venv
+__pycache__
+*.py[cod]
+.git
+uploads
+output
+test_tmp
+e2e_tmp
+screenshot.png
+settings.json
+tests
+deploy
+README.md
+LICENSE
